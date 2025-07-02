@@ -2,3 +2,4 @@ fastenv/
 __pycache__/
 __pychache__/*
 *.pyc
+*.db
