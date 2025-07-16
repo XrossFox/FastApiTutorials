@@ -11,7 +11,7 @@ class Book:
     title: str = ""
     author: str = ""
     description: str = ""
-    rating: int = -1,
+    rating: int = -1
     published_date: datetime.date = None
 
     def __init__(self, id: int, title : str, author: str, description: str, rating: int, published_date: datetime.date) -> None:

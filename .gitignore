@@ -3,3 +3,4 @@ __pycache__/
 __pychache__/*
 *.pyc
 *.db
+app_secrets.py
