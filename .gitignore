@@ -4,3 +4,4 @@ __pychache__/*
 *.pyc
 *.db
 app_secrets.py
+.vscode
