@@ -50,8 +50,8 @@ class CreateUserRequest(BaseModel):
     password: str
     role: str
 
-def create_access_token(username: str, user_id: int, expires_delta: timedelta):
-    encode = {'sub': username, 'id': user_id}
+def create_access_token(username: str, user_id: int, role: str, expires_delta: timedelta):
+    encode = {'sub': username, 'id': user_id, "role": role}
     expires = datetime.now(timezone.utc) + expires_delta
     encode.update({'exp': expires})
     return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
@@ -61,23 +61,24 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get('sub')
         user_id: int = payload.get('id')
+        user_role: str = payload.get("role")
 
         if username is None or user_id is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Who are you, m8?')
-        return {'username': username, 'id': user_id}
+        return {'username': username, 'id': user_id, "user_role": user_role}
 
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Who are you, m8?')
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-async def get_user(db: db_dependency, create_user_request: CreateUserRequest):
+async def new_user(db: db_dependency, create_user_request: CreateUserRequest):
     create_user_model = Users(
         email=create_user_request.email,
         username=create_user_request.username,
         first_name=create_user_request.first_name,
         last_name=create_user_request.last_name,
         role=create_user_request.role,
-        hashed_password=bcrypt_context.hash(create_user_request.password ),
+        hashed_password=bcrypt_context.hash(create_user_request.password),
         is_active=True
     )
 
@@ -91,5 +92,5 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Who are you, m8?')
 
-    token = create_access_token(user.username, user.id, timedelta(minutes=20)) # type: ignore
+    token = create_access_token(user.username, user.id, user.role, timedelta(minutes=20)) # type: ignore
     return {'access_token': token, 'token_type': 'bearer'}
