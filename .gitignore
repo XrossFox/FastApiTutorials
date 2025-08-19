@@ -5,3 +5,4 @@ __pychache__/*
 *.db
 app_secrets.py
 .vscode
+conf.py
