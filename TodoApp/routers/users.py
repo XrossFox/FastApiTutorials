@@ -13,6 +13,9 @@ class ChangePasswordRequest(BaseModel):
     old_password: str
     new_password: str
 
+class UpdatePhoneNumberRequest(BaseModel):
+    new_phone_number: str
+
 router = APIRouter(
     prefix="/users",
     tags=['users']
@@ -40,11 +43,21 @@ async def get_my_profile(user: user_dependency, db: db_dependency):
         first_name = actual_query.first_name
         last_name = actual_query.last_name
         role = actual_query.role
-        res = {"username": username, "email": email, "first_name": first_name, "last_name": last_name, "role": role}
+        phone_number = actual_query.phone_number
+        res = {"username": username, "email": email, "first_name": first_name,
+               "last_name": last_name, "role": role, "phone_number": phone_number}
 
         return res
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail = "U wot m8?")
+
+@router.put('/update_phone_number', status_code=status.HTTP_204_NO_CONTENT)
+async def update_phone_number(user: user_dependency, db: db_dependency, update_ph_num: UpdatePhoneNumberRequest):
+    if user is not None:
+        db.query(Users).filter(Users.id == user.get('id')).update({Users.phone_number: update_ph_num.new_phone_number})
+        db.commit()
+        return
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Who are ya?")
 
 @router.post("/change_password", status_code=status.HTTP_201_CREATED)
 async def change_password(db: db_dependency, user: user_dependency, change_password_request: ChangePasswordRequest):
