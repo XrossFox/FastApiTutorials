@@ -4,7 +4,6 @@ __pychache__/*
 *.pyc
 *.db
 app_secrets.py
-.vscode
 conf.py
 testing_env.py
 .DS_Store
